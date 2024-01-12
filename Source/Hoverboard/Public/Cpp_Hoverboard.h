@@ -5,9 +5,12 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/SpringArmComponent.h"
+#include <Kismet/GameplayStatics.h>
 #include <Camera/CameraComponent.h>
 #include <Cpp_SC_HoverComp.h>
+#include <GameFramework/FloatingPawnMovement.h>
 #include "Cpp_Hoverboard.generated.h"
+
 
 
 
@@ -23,7 +26,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	USceneComponent* Root;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* Hoverboard;
 
 	UPROPERTY(EditAnywhere)
@@ -32,19 +35,42 @@ public:
 	UPROPERTY(EditAnywhere)
 	UCameraComponent* Camera;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UCpp_SC_HoverComp* HoverCompLT;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UCpp_SC_HoverComp* HoverCompRT;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UCpp_SC_HoverComp* HoverCompLB;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UCpp_SC_HoverComp* HoverCompRB;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UFloatingPawnMovement* FloatingMovemnt;
 
+	UFUNCTION()
+	void MoveHover(float AxisValue);
+
+	UFUNCTION()
+	void RotateHover(float AxisValue);
+
+	UPROPERTY(EditAnywhere)
+	float Speed;
+
+	UFUNCTION()
+	void NegateRotation();
+
+	UFUNCTION()
+	void TurnX(float AxisValue);
+
+	UFUNCTION()
+	void TurnY(float AxisValue);
+
+	APlayerController* PlayerController;
+
+	
 
 
 

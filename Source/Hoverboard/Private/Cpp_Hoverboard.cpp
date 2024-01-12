@@ -2,6 +2,7 @@
 
 
 #include "Cpp_Hoverboard.h"
+#include <Kismet/KismetMathLibrary.h>
 
 // Sets default values
 ACpp_Hoverboard::ACpp_Hoverboard()
@@ -25,13 +26,61 @@ ACpp_Hoverboard::ACpp_Hoverboard()
 	HoverCompRT->SetupAttachment(Hoverboard);
 	HoverCompRB = CreateDefaultSubobject<UCpp_SC_HoverComp>(TEXT("HoverCompRB"));
 	HoverCompRB->SetupAttachment(Hoverboard);
+	FloatingMovemnt = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("FloatingMovemnt"));
+
+	AutoPossessPlayer = EAutoReceiveInput::Player0;
+
+	
+
+
+
+}
+
+void ACpp_Hoverboard::MoveHover(float AxisValue)
+{
+
+	Hoverboard->AddForce(Hoverboard->GetForwardVector() * Speed * AxisValue, "None", true);
+
+}
+
+void ACpp_Hoverboard::RotateHover(float AxisValue)
+{
+	
+	Hoverboard->AddLocalRotation(FRotator(0, 1, 0.5) * AxisValue);
+
+}
+
+void ACpp_Hoverboard::NegateRotation()
+{
+
+	Hoverboard->SetRelativeRotation(UKismetMathLibrary::RLerp(Hoverboard->GetRelativeRotation(), FRotator(0, Hoverboard->GetRelativeRotation().Yaw, 0), 0.025, true));
+
+}
+
+void ACpp_Hoverboard::TurnX(float AxisValue)
+{
+	if (PlayerController)
+	{
+		PlayerController->AddYawInput(AxisValue * 0.75);
+	}
+}
+
+void ACpp_Hoverboard::TurnY(float AxisValue)
+{
+    if (PlayerController)
+	{
+		PlayerController->AddPitchInput(AxisValue * -0.75);
+	}
+
+
 }
 
 // Called when the game starts or when spawned
 void ACpp_Hoverboard::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 }
 
 // Called every frame
@@ -39,12 +88,19 @@ void ACpp_Hoverboard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	NegateRotation();
 }
 
 // Called to bind functionality to input
 void ACpp_Hoverboard::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	PlayerInputComponent->BindAxis("MoveHover", this, &ACpp_Hoverboard::MoveHover);
+	PlayerInputComponent->BindAxis("RotateHover", this, &ACpp_Hoverboard::RotateHover);
+	PlayerInputComponent->BindAxis("TurningX", this, &ACpp_Hoverboard::TurnX);
+	PlayerInputComponent->BindAxis("TurningY", this, &ACpp_Hoverboard::TurnY);
+
 
 }
 

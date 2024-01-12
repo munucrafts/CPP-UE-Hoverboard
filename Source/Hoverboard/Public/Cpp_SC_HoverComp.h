@@ -16,7 +16,19 @@ public:
 	// Sets default values for this component's properties
 	UCpp_SC_HoverComp();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* LocMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TraceLength;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HoverForce;
+
 	
+
+
+
 
 protected:
 	// Called when the game starts
