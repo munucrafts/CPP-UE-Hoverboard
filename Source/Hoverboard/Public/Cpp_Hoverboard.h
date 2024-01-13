@@ -29,6 +29,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* Hoverboard;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	USkeletalMeshComponent* Rider;
+
 	UPROPERTY(EditAnywhere)
 	USpringArmComponent* SpringArm;
 

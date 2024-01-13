@@ -14,6 +14,8 @@ ACpp_Hoverboard::ACpp_Hoverboard()
 	RootComponent = Root;
 	Hoverboard = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Hoverboard"));
 	Hoverboard->SetupAttachment(Root);
+	Rider = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Rider"));
+	Rider->SetupAttachment(Hoverboard);
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(Hoverboard);
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
@@ -50,7 +52,7 @@ void ACpp_Hoverboard::MoveHover(float AxisValue)
 void ACpp_Hoverboard::RotateHover(float AxisValue)
 {
 	float Yaw = UKismetMathLibrary::SelectFloat(1, -1, MovingForward);
-	Hoverboard->AddLocalRotation(FRotator(0, Yaw, 0.1) * AxisValue);
+	Hoverboard->AddLocalRotation(FRotator(0, Yaw, 1.5) * AxisValue);
 }
 
 void ACpp_Hoverboard::NegateRotation()
