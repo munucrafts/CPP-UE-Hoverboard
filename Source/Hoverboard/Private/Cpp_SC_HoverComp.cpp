@@ -56,7 +56,7 @@ void UCpp_SC_HoverComp::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	}
 	else 
 	{
-		LocMesh->AddForceAtLocation(FVector(0, 0, -30000), this->GetComponentLocation());
+		LocMesh->AddForceAtLocation(FVector(0, 0, -HoverForce), this->GetComponentLocation());
 		LocMesh->SetLinearDamping(1);
 		LocMesh->SetAngularDamping(100);
 	}

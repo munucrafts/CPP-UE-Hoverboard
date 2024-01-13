@@ -2,7 +2,10 @@
 
 
 #include "Cpp_Hoverboard.h"
+#include "Particles/ParticleSystemComponent.h"
 #include <Kismet/KismetMathLibrary.h>
+#include <Cpp_Fire.h>
+
 
 // Sets default values
 ACpp_Hoverboard::ACpp_Hoverboard()
@@ -28,7 +31,9 @@ ACpp_Hoverboard::ACpp_Hoverboard()
 	HoverCompRT->SetupAttachment(Hoverboard);
 	HoverCompRB = CreateDefaultSubobject<UCpp_SC_HoverComp>(TEXT("HoverCompRB"));
 	HoverCompRB->SetupAttachment(Hoverboard);
-	FloatingMovemnt = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("FloatingMovemnt"));
+	Booster = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Boost"));
+	Booster->SetupAttachment(Hoverboard);
+
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 
@@ -44,9 +49,12 @@ void ACpp_Hoverboard::MoveHover(float AxisValue)
 {
 
 	Hoverboard->AddForce(Hoverboard->GetForwardVector() * Speed * AxisValue, "None", true);
+	Hoverboard->AddLocalRotation(FRotator(0.45, 0, 0) * AxisValue);
+	
 	if (AxisValue >= 0) MovingForward = true;
 	else MovingForward = false;
 
+	if (AxisValue != 0) UGameplayStatics::PlaySoundAtLocation(this->GetWorld(), HoverSound, this->GetActorLocation());
 }
 
 void ACpp_Hoverboard::RotateHover(float AxisValue)
@@ -60,6 +68,35 @@ void ACpp_Hoverboard::NegateRotation()
 
 	Hoverboard->SetRelativeRotation(UKismetMathLibrary::RLerp(Hoverboard->GetRelativeRotation(), FRotator(0, Hoverboard->GetRelativeRotation().Yaw, 0), 0.015, true));
 
+}
+
+void ACpp_Hoverboard::BoostSpeed()
+{
+	if (MovingForward)
+	{
+
+		Speed = UKismetMathLibrary::Lerp(2000, 10000, 1);
+		Booster->Activate();
+		UGameplayStatics::PlaySoundAtLocation(this->GetWorld(), BoosterSound, this->GetActorLocation());
+		
+	}
+}
+
+void ACpp_Hoverboard::ReturnToNormalSpeed()
+{
+
+	Speed = UKismetMathLibrary::Lerp(10000, 2000, 1);
+	Booster->Deactivate();
+
+}
+
+void ACpp_Hoverboard::SpawnBurnMarks()
+{
+	if (MovingForward && Speed > 9000 && Hoverboard->GetComponentLocation().Z < 500)
+	{
+		GetWorld()->SpawnActor<ACpp_Fire>(BP_Fire, FVector(Hoverboard->GetComponentLocation().X, Hoverboard->GetComponentLocation().Y, 0), FRotator(0, Hoverboard->GetComponentRotation().Yaw, 0));
+
+	}
 }
 
 void ACpp_Hoverboard::TurnX(float AxisValue)
@@ -85,6 +122,7 @@ void ACpp_Hoverboard::BeginPlay()
 {
 	Super::BeginPlay();
 
+	Booster->Deactivate();
 	PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 }
 
@@ -92,8 +130,8 @@ void ACpp_Hoverboard::BeginPlay()
 void ACpp_Hoverboard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 	NegateRotation();
+	SpawnBurnMarks();
 }
 
 // Called to bind functionality to input
@@ -105,6 +143,9 @@ void ACpp_Hoverboard::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis("RotateHover", this, &ACpp_Hoverboard::RotateHover);
 	PlayerInputComponent->BindAxis("TurningX", this, &ACpp_Hoverboard::TurnX);
 	PlayerInputComponent->BindAxis("TurningY", this, &ACpp_Hoverboard::TurnY);
+	PlayerInputComponent->BindAction("ControlSpeed", IE_Pressed, this, &ACpp_Hoverboard::BoostSpeed);
+	PlayerInputComponent->BindAction("ControlSpeed", IE_Released, this, &ACpp_Hoverboard::ReturnToNormalSpeed);
+
 
 
 }

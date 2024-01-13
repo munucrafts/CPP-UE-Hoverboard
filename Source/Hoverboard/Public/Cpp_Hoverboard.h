@@ -8,6 +8,7 @@
 #include <Kismet/GameplayStatics.h>
 #include <Camera/CameraComponent.h>
 #include <Cpp_SC_HoverComp.h>
+#include <Cpp_Fire.h>
 #include <GameFramework/FloatingPawnMovement.h>
 #include "Cpp_Hoverboard.generated.h"
 
@@ -25,6 +26,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	USceneComponent* Root;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystemComponent* Booster;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* Hoverboard;
@@ -50,20 +54,26 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UCpp_SC_HoverComp* HoverCompRB;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UFloatingPawnMovement* FloatingMovemnt;
-
 	UFUNCTION()
 	void MoveHover(float AxisValue);
 
 	UFUNCTION()
 	void RotateHover(float AxisValue);
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Speed;
 
 	UFUNCTION()
 	void NegateRotation();
+
+	UFUNCTION()
+	void BoostSpeed();
+
+	UFUNCTION()
+	void ReturnToNormalSpeed();
+
+	UFUNCTION()
+	void SpawnBurnMarks();
 
 	UFUNCTION()
 	void TurnX(float AxisValue);
@@ -74,7 +84,14 @@ public:
 	APlayerController* PlayerController;
 	bool MovingForward;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ACpp_Fire>BP_Fire;
 	
+	UPROPERTY(EditAnywhere)
+	USoundBase* HoverSound;
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* BoosterSound;
 
 
 
