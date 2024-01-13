@@ -69,6 +69,7 @@ public:
 	void TurnY(float AxisValue);
 
 	APlayerController* PlayerController;
+	bool MovingForward;
 
 	
 

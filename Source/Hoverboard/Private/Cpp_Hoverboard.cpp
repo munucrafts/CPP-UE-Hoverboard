@@ -30,6 +30,8 @@ ACpp_Hoverboard::ACpp_Hoverboard()
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 
+	MovingForward = true;
+
 	
 
 
@@ -40,20 +42,21 @@ void ACpp_Hoverboard::MoveHover(float AxisValue)
 {
 
 	Hoverboard->AddForce(Hoverboard->GetForwardVector() * Speed * AxisValue, "None", true);
+	if (AxisValue >= 0) MovingForward = true;
+	else MovingForward = false;
 
 }
 
 void ACpp_Hoverboard::RotateHover(float AxisValue)
 {
-	
-	Hoverboard->AddLocalRotation(FRotator(0, 1, 0.5) * AxisValue);
-
+	float Yaw = UKismetMathLibrary::SelectFloat(1, -1, MovingForward);
+	Hoverboard->AddLocalRotation(FRotator(0, Yaw, 0.1) * AxisValue);
 }
 
 void ACpp_Hoverboard::NegateRotation()
 {
 
-	Hoverboard->SetRelativeRotation(UKismetMathLibrary::RLerp(Hoverboard->GetRelativeRotation(), FRotator(0, Hoverboard->GetRelativeRotation().Yaw, 0), 0.025, true));
+	Hoverboard->SetRelativeRotation(UKismetMathLibrary::RLerp(Hoverboard->GetRelativeRotation(), FRotator(0, Hoverboard->GetRelativeRotation().Yaw, 0), 0.015, true));
 
 }
 
