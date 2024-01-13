@@ -27,6 +27,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	USceneComponent* Root;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UCapsuleComponent* Capsule;
+
+	UPROPERTY(EditAnywhere)
+	UCapsuleComponent* Collision;
+
 	UPROPERTY(EditAnywhere)
 	UParticleSystemComponent* Booster;
 
@@ -76,6 +82,9 @@ public:
 	void SpawnBurnMarks();
 
 	UFUNCTION()
+	void CheckInAirOrNot();
+
+	UFUNCTION()
 	void TurnX(float AxisValue);
 
 	UFUNCTION()
@@ -83,6 +92,9 @@ public:
 
 	APlayerController* PlayerController;
 	bool MovingForward;
+	float ForwardMovementValue;
+	float RotateMovementValue;
+	bool InAir;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ACpp_Fire>BP_Fire;

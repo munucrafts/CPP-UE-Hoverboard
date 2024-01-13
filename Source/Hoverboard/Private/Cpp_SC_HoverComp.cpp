@@ -35,10 +35,11 @@ void UCpp_SC_HoverComp::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	FVector Start = this->GetComponentLocation() - FVector(0, 0, 5);  
+	FVector Start = this->GetComponentLocation();  
 	FVector End = Start + this->GetUpVector() * (-1) * TraceLength;
 	FHitResult OutHit;
 	FCollisionQueryParams CollisionsParams;
+	CollisionsParams.AddIgnoredActor(this->GetOwner());
 
 	bool HasHit = GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECollisionChannel::ECC_Visibility, CollisionsParams);
 	DrawDebugDirectionalArrow(GetWorld(), Start, End, 5.0f, FColor::Red, false, 0.01f, 0, 1.f);
@@ -56,7 +57,7 @@ void UCpp_SC_HoverComp::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	}
 	else 
 	{
-		LocMesh->AddForceAtLocation(FVector(0, 0, -HoverForce), this->GetComponentLocation());
+		LocMesh->AddForceAtLocation(FVector(0, 0, -0.1 * HoverForce), this->GetComponentLocation());
 		LocMesh->SetLinearDamping(1);
 		LocMesh->SetAngularDamping(100);
 	}

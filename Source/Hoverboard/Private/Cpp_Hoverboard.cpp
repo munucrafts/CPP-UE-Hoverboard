@@ -3,6 +3,7 @@
 
 #include "Cpp_Hoverboard.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Components/CapsuleComponent.h"
 #include <Kismet/KismetMathLibrary.h>
 #include <Cpp_Fire.h>
 
@@ -33,11 +34,17 @@ ACpp_Hoverboard::ACpp_Hoverboard()
 	HoverCompRB->SetupAttachment(Hoverboard);
 	Booster = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Boost"));
 	Booster->SetupAttachment(Hoverboard);
-
+	Capsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
+	Capsule->SetupAttachment(Hoverboard);
+	Collision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Collision"));
+	Collision->SetupAttachment(Hoverboard);
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 
 	MovingForward = true;
+	InAir = false;
+
+	
 
 	
 
@@ -47,27 +54,58 @@ ACpp_Hoverboard::ACpp_Hoverboard()
 
 void ACpp_Hoverboard::MoveHover(float AxisValue)
 {
-
-	Hoverboard->AddForce(Hoverboard->GetForwardVector() * Speed * AxisValue, "None", true);
-	Hoverboard->AddLocalRotation(FRotator(0.45, 0, 0) * AxisValue);
 	
-	if (AxisValue >= 0) MovingForward = true;
-	else MovingForward = false;
+	ForwardMovementValue = AxisValue;
+	if (InAir == false)
+	{
+		if (AxisValue > 0)
+		{
+			MovingForward = true;
+			UGameplayStatics::PlaySoundAtLocation(this->GetWorld(), HoverSound, this->GetActorLocation());
+		}
+		else if (AxisValue < 0)
+		{
+			MovingForward = false;
+			UGameplayStatics::PlaySoundAtLocation(this->GetWorld(), HoverSound, this->GetActorLocation());
+		}
 
-	if (AxisValue != 0) UGameplayStatics::PlaySoundAtLocation(this->GetWorld(), HoverSound, this->GetActorLocation());
+		FVector Forward = Hoverboard->GetForwardVector();
+		Forward.Y, Forward.Z = 0;
+		Hoverboard->AddForce(Forward * Speed * AxisValue, "None", true);
+		Hoverboard->AddLocalRotation(FRotator(0.35, 0, 0) * AxisValue);
+	}
+	else 
+	{
+		FVector InAirForward = Hoverboard->GetForwardVector();
+		InAirForward.Y, InAirForward.Z = 0;
+		Hoverboard->AddForce(InAirForward * Speed * AxisValue, "None", true);
+		Hoverboard->AddLocalRotation(FRotator(1, 0, 0) * AxisValue);
+
+	}
 }
 
 void ACpp_Hoverboard::RotateHover(float AxisValue)
 {
-	float Yaw = UKismetMathLibrary::SelectFloat(1, -1, MovingForward);
-	Hoverboard->AddLocalRotation(FRotator(0, Yaw, 1.5) * AxisValue);
+	
+	RotateMovementValue = AxisValue;
+	if (InAir == false)
+	{
+		float Yaw = 1 * AxisValue * UKismetMathLibrary::SelectInt(1, -1, MovingForward);
+		Hoverboard->AddLocalRotation(FRotator(0, Yaw, UKismetMathLibrary::SelectFloat(0, 1, ForwardMovementValue == 0) * AxisValue));
+	}
+	else
+	{
+		float InAirYaw = 2 * UKismetMathLibrary::SelectInt(1, -1, MovingForward);
+		Hoverboard->AddLocalRotation(FRotator(0, InAirYaw, 0) * AxisValue);
+	}
 }
 
 void ACpp_Hoverboard::NegateRotation()
 {
-
-	Hoverboard->SetRelativeRotation(UKismetMathLibrary::RLerp(Hoverboard->GetRelativeRotation(), FRotator(0, Hoverboard->GetRelativeRotation().Yaw, 0), 0.015, true));
-
+	if (InAir == false)
+	{
+		Hoverboard->SetRelativeRotation(UKismetMathLibrary::RLerp(Hoverboard->GetRelativeRotation(), FRotator(0, Hoverboard->GetRelativeRotation().Yaw, 0), 0.015, true));
+	}
 }
 
 void ACpp_Hoverboard::BoostSpeed()
@@ -97,6 +135,21 @@ void ACpp_Hoverboard::SpawnBurnMarks()
 		GetWorld()->SpawnActor<ACpp_Fire>(BP_Fire, FVector(Hoverboard->GetComponentLocation().X, Hoverboard->GetComponentLocation().Y, 0), FRotator(0, Hoverboard->GetComponentRotation().Yaw, 0));
 
 	}
+}
+
+void ACpp_Hoverboard::CheckInAirOrNot()
+{
+	float TraceLength = 2 * HoverCompRB->TraceLength;
+	FVector Start = Hoverboard->GetComponentLocation();
+	FVector End = Start + FVector(0, 0, Hoverboard->GetUpVector().Z) * (-1) * TraceLength;
+	FHitResult OutHit;
+	FCollisionQueryParams CollisionsParams;
+	CollisionsParams.AddIgnoredActor(this);
+
+	bool HasHit = GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECollisionChannel::ECC_Visibility, CollisionsParams);
+	DrawDebugDirectionalArrow(GetWorld(), Start, End, 5.0f, FColor::Red, false, 0.01f, 0, 1.f);
+
+	InAir = !HasHit;
 }
 
 void ACpp_Hoverboard::TurnX(float AxisValue)
@@ -132,6 +185,7 @@ void ACpp_Hoverboard::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	NegateRotation();
 	SpawnBurnMarks();
+	CheckInAirOrNot();
 }
 
 // Called to bind functionality to input
