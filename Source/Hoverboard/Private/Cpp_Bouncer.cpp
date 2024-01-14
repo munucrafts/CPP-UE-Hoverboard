@@ -42,7 +42,7 @@ void ACpp_Bouncer::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 void ACpp_Bouncer::AddBounceForce(UPrimitiveComponent* Comp)
 {
 	
-	Comp->AddForceAtLocation(BounceForce * this->GetActorUpVector(), Comp->GetComponentLocation());
+	//Comp->AddForceAtLocation(BounceForce * this->GetActorUpVector(), Comp->GetComponentLocation());
 
 }
 
