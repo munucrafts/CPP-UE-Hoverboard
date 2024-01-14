@@ -78,8 +78,7 @@ void ACpp_Hoverboard::MoveHover(float AxisValue)
 	{
 		FVector InAirForward = Hoverboard->GetForwardVector();
 		InAirForward.Y, InAirForward.Z = 0;
-		Hoverboard->AddForce(InAirForward * Speed * AxisValue, "None", true);
-		Hoverboard->AddLocalRotation(FRotator(1, 0, 0) * AxisValue);
+		Hoverboard->AddLocalRotation(FRotator(3, 0, 0) * AxisValue);
 
 	}
 }
@@ -95,7 +94,7 @@ void ACpp_Hoverboard::RotateHover(float AxisValue)
 	}
 	else
 	{
-		float InAirYaw = 2 * UKismetMathLibrary::SelectInt(1, -1, MovingForward);
+		float InAirYaw = 7 * UKismetMathLibrary::SelectInt(1, -1, MovingForward);
 		Hoverboard->AddLocalRotation(FRotator(0, InAirYaw, 0) * AxisValue);
 	}
 }
@@ -110,7 +109,7 @@ void ACpp_Hoverboard::NegateRotation()
 
 void ACpp_Hoverboard::BoostSpeed()
 {
-	if (MovingForward)
+	if (MovingForward && InAir == false)
 	{
 
 		Speed = UKismetMathLibrary::Lerp(2000, 10000, 1);
@@ -147,9 +146,18 @@ void ACpp_Hoverboard::CheckInAirOrNot()
 	CollisionsParams.AddIgnoredActor(this);
 
 	bool HasHit = GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECollisionChannel::ECC_Visibility, CollisionsParams);
-	DrawDebugDirectionalArrow(GetWorld(), Start, End, 5.0f, FColor::Red, false, 0.01f, 0, 1.f);
+	//DrawDebugDirectionalArrow(GetWorld(), Start, End, 5.0f, FColor::Red, false, 0.01f, 0, 1.f);
 
 	InAir = !HasHit;
+
+	if (InAir)
+	{
+		Booster->Deactivate();
+	}
+	else if (Speed == 10000)
+	{
+		Booster->Activate();
+	}
 }
 
 void ACpp_Hoverboard::TurnX(float AxisValue)
