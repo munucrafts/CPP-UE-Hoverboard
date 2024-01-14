@@ -44,7 +44,7 @@ ACpp_Hoverboard::ACpp_Hoverboard()
 	MovingForward = true;
 	InAir = false;
 
-	
+	Collision->OnComponentBeginOverlap.AddDynamic(this, &ACpp_Hoverboard::OnOverlapBegin);
 
 	
 
@@ -168,6 +168,19 @@ void ACpp_Hoverboard::TurnY(float AxisValue)
 	}
 
 
+}
+
+void ACpp_Hoverboard::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor)
+	{
+
+		Rider->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		Rider->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		Rider->SetSimulatePhysics(true);
+		Rider->AddForceAtLocation(Hoverboard->GetForwardVector() * Speed * 500, this->GetActorLocation(), "None");
+		
+	}
 }
 
 // Called when the game starts or when spawned
