@@ -178,6 +178,17 @@ void ACpp_Hoverboard::TurnY(float AxisValue)
 
 }
 
+void ACpp_Hoverboard::Jumping()
+{
+
+	UAnimInstance* JumpAnimInstance = Rider->GetAnimInstance();
+	if (JumpAnimInstance) JumpAnimInstance->Montage_Play(JumpAnimMontage, 1);
+
+	Hoverboard->AddForceAtLocation(Hoverboard->GetUpVector() * -1 * 1500000, Hoverboard->GetComponentLocation());
+
+	
+}
+
 void ACpp_Hoverboard::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor)
@@ -220,6 +231,7 @@ void ACpp_Hoverboard::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis("TurningY", this, &ACpp_Hoverboard::TurnY);
 	PlayerInputComponent->BindAction("ControlSpeed", IE_Pressed, this, &ACpp_Hoverboard::BoostSpeed);
 	PlayerInputComponent->BindAction("ControlSpeed", IE_Released, this, &ACpp_Hoverboard::ReturnToNormalSpeed);
+	PlayerInputComponent->BindAction("Jumping", IE_Pressed, this, &ACpp_Hoverboard::Jumping);
 
 
 
