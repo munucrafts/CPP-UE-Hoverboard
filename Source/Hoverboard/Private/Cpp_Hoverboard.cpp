@@ -194,11 +194,11 @@ void ACpp_Hoverboard::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor
 	if (OtherActor)
 	{
 
-		Rider->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-		Rider->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-		Rider->SetSimulatePhysics(true);
-		Rider->AddForceAtLocation(Hoverboard->GetForwardVector() * Speed * 500, this->GetActorLocation(), "None");
-		
+		//Rider->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		//Rider->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		//Rider->SetSimulatePhysics(true);
+		//Rider->AddForceAtLocation(Hoverboard->GetForwardVector() * Speed * 500, this->GetActorLocation(), "None");
+		//
 	}
 }
 
