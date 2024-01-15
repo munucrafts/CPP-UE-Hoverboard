@@ -4,6 +4,7 @@
 #include "Cpp_Bouncer.h"
 #include "Particles/ParticleSystemComponent.h"
 #include <Cpp_Hoverboard.h>
+#include <Components/BoxComponent.h>
 
 
 
@@ -17,33 +18,30 @@ ACpp_Bouncer::ACpp_Bouncer()
 	RootComponent = Root;
 	BouncerMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BouncerMesh"));
 	BouncerMesh->SetupAttachment(Root);
-	BouncerParticle = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("BouncerParticle"));
-	BouncerParticle->SetupAttachment(Root);
-	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
-	BoxCollision->SetupAttachment(Root);
-
-	BoxCollision->OnComponentBeginOverlap.AddDynamic(this, &ACpp_Bouncer::OnOverlapBegin);
+	BouncerParticles = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("BouncerParticle"));
+	BouncerParticles->SetupAttachment(Root);
+	BouncerCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BouncerCollision"));
+	BouncerCollision->SetupAttachment(Root);
+	BouncerCollision->OnComponentBeginOverlap.AddDynamic(this, &ACpp_Bouncer::OnOverlapBegin);
 
 
 }
 
 void ACpp_Bouncer::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-
-	UE_LOG(LogTemp, Warning, TEXT("ddddddd"));
 	if (Cast<ACpp_Hoverboard>(OtherActor))
 	{
-		
 		AddBounceForce(OtherComp);
 	}
-
 }
 
 void ACpp_Bouncer::AddBounceForce(UPrimitiveComponent* Comp)
 {
-	
-	//Comp->AddForceAtLocation(BounceForce * this->GetActorUpVector(), Comp->GetComponentLocation());
-
+	if (Comp->GetClass() == UStaticMeshComponent::StaticClass())
+	{
+		Comp->SetSimulatePhysics(true);
+		Comp->AddForceAtLocation(BounceForce * 100000 * this->GetActorUpVector(), Comp->GetComponentLocation());
+	}
 }
 
 // Called when the game starts or when spawned

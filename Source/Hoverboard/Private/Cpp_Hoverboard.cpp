@@ -34,10 +34,8 @@ ACpp_Hoverboard::ACpp_Hoverboard()
 	HoverCompRB->SetupAttachment(Hoverboard);
 	Booster = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Boost"));
 	Booster->SetupAttachment(Hoverboard);
-	Capsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
-	Capsule->SetupAttachment(Hoverboard);
 	Collision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Collision"));
-	Collision->SetupAttachment(Hoverboard);
+	Collision->SetupAttachment(Rider);
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 
@@ -85,12 +83,18 @@ void ACpp_Hoverboard::MoveHover(float AxisValue)
 
 void ACpp_Hoverboard::RotateHover(float AxisValue)
 {
-	
+
 	RotateMovementValue = AxisValue;
-	if (InAir == false)
+	if (InAir == false && ForwardMovementValue != 0)
 	{
 		float Yaw = 1 * AxisValue * UKismetMathLibrary::SelectInt(1, -1, MovingForward);
 		Hoverboard->AddLocalRotation(FRotator(0, Yaw, UKismetMathLibrary::SelectFloat(0, 1, ForwardMovementValue == 0) * AxisValue));
+	}
+	else if (InAir == false && ForwardMovementValue == 0)
+	{
+
+		float Yaw = 3 * AxisValue * 1;
+			Hoverboard->AddLocalRotation(FRotator(0, Yaw, UKismetMathLibrary::SelectFloat(0, 1, ForwardMovementValue == 0) * AxisValue));
 	}
 	else
 	{
@@ -191,7 +195,7 @@ void ACpp_Hoverboard::Jumping()
 
 void ACpp_Hoverboard::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor)
+	if (!ActionClasses.Contains(OtherActor->GetClass()))
 	{
 
 		Rider->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);

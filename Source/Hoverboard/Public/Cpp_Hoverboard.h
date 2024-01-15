@@ -27,9 +27,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	USceneComponent* Root;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UCapsuleComponent* Capsule;
-
 	UPROPERTY(EditAnywhere)
 	UCapsuleComponent* Collision;
 
@@ -116,6 +113,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	USoundBase* BoosterSound;
+
+	UPROPERTY(EditAnywhere)
+	TArray <UClass*> ActionClasses;
 
 
 
