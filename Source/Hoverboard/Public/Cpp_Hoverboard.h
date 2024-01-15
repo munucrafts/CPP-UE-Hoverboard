@@ -91,6 +91,9 @@ public:
 	void Jumping();
 
 	UFUNCTION()
+	void SplineSliding(USplineComponent* SplineComp);
+
+	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	APlayerController* PlayerController;
@@ -98,12 +101,10 @@ public:
 	float ForwardMovementValue;
 	float RotateMovementValue;
 	bool InAir;
+	bool InAction;
 
 	UPROPERTY(EditAnywhere)
 	UAnimMontage* JumpAnimMontage;
-
-	UPROPERTY(EditAnywhere)
-	UEnum* ActionEnum;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ACpp_Fire>BP_Fire;

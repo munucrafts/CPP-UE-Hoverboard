@@ -6,6 +6,7 @@
 #include "Components/CapsuleComponent.h"
 #include <Kismet/KismetMathLibrary.h>
 #include <Cpp_Fire.h>
+#include <Cpp_SlideSpline.h>
 
 
 // Sets default values
@@ -41,6 +42,7 @@ ACpp_Hoverboard::ACpp_Hoverboard()
 
 	MovingForward = true;
 	InAir = false;
+	InAction = false;
 
 	Collision->OnComponentBeginOverlap.AddDynamic(this, &ACpp_Hoverboard::OnOverlapBegin);
 
@@ -52,54 +54,58 @@ ACpp_Hoverboard::ACpp_Hoverboard()
 
 void ACpp_Hoverboard::MoveHover(float AxisValue)
 {
-	
-	ForwardMovementValue = AxisValue;
-	if (InAir == false)
+	if (!InAction)
 	{
-		if (AxisValue > 0)
+		ForwardMovementValue = AxisValue;
+		if (InAir == false)
 		{
-			MovingForward = true;
-			UGameplayStatics::PlaySoundAtLocation(this->GetWorld(), HoverSound, this->GetActorLocation());
+			if (AxisValue > 0)
+			{
+				MovingForward = true;
+				UGameplayStatics::PlaySoundAtLocation(this->GetWorld(), HoverSound, this->GetActorLocation());
+			}
+			else if (AxisValue < 0)
+			{
+				MovingForward = false;
+				UGameplayStatics::PlaySoundAtLocation(this->GetWorld(), HoverSound, this->GetActorLocation());
+			}
+
+			FVector Forward = Hoverboard->GetForwardVector();
+			Forward.Y, Forward.Z = 0;
+			Hoverboard->AddForce(Forward * Speed * AxisValue, "None", true);
+			Hoverboard->AddLocalRotation(FRotator(0.35, 0, 0) * AxisValue);
 		}
-		else if (AxisValue < 0)
+		else
 		{
-			MovingForward = false;
-			UGameplayStatics::PlaySoundAtLocation(this->GetWorld(), HoverSound, this->GetActorLocation());
+			FVector InAirForward = Hoverboard->GetForwardVector();
+			InAirForward.Y, InAirForward.Z = 0;
+			Hoverboard->AddLocalRotation(FRotator(3, 0, 0) * AxisValue);
+
 		}
-
-		FVector Forward = Hoverboard->GetForwardVector();
-		Forward.Y, Forward.Z = 0;
-		Hoverboard->AddForce(Forward * Speed * AxisValue, "None", true);
-		Hoverboard->AddLocalRotation(FRotator(0.35, 0, 0) * AxisValue);
-	}
-	else 
-	{
-		FVector InAirForward = Hoverboard->GetForwardVector();
-		InAirForward.Y, InAirForward.Z = 0;
-		Hoverboard->AddLocalRotation(FRotator(3, 0, 0) * AxisValue);
-
 	}
 }
 
 void ACpp_Hoverboard::RotateHover(float AxisValue)
 {
-
-	RotateMovementValue = AxisValue;
-	if (InAir == false && ForwardMovementValue != 0)
+	if (!InAction)
 	{
-		float Yaw = 1 * AxisValue * UKismetMathLibrary::SelectInt(1, -1, MovingForward);
-		Hoverboard->AddLocalRotation(FRotator(0, Yaw, UKismetMathLibrary::SelectFloat(0, 1, ForwardMovementValue == 0) * AxisValue));
-	}
-	else if (InAir == false && ForwardMovementValue == 0)
-	{
-
-		float Yaw = 3 * AxisValue * 1;
+		RotateMovementValue = AxisValue;
+		if (InAir == false && ForwardMovementValue != 0)
+		{
+			float Yaw = 1 * AxisValue * UKismetMathLibrary::SelectInt(1, -1, MovingForward);
 			Hoverboard->AddLocalRotation(FRotator(0, Yaw, UKismetMathLibrary::SelectFloat(0, 1, ForwardMovementValue == 0) * AxisValue));
-	}
-	else
-	{
-		float InAirYaw = 7 * UKismetMathLibrary::SelectInt(1, -1, MovingForward);
-		Hoverboard->AddLocalRotation(FRotator(0, InAirYaw, 0) * AxisValue);
+		}
+		else if (InAir == false && ForwardMovementValue == 0)
+		{
+
+			float Yaw = 3 * AxisValue * 1;
+			Hoverboard->AddLocalRotation(FRotator(0, Yaw, UKismetMathLibrary::SelectFloat(0, 1, ForwardMovementValue == 0) * AxisValue));
+		}
+		else
+		{
+			float InAirYaw = 7 * UKismetMathLibrary::SelectInt(1, -1, MovingForward);
+			Hoverboard->AddLocalRotation(FRotator(0, InAirYaw, 0) * AxisValue);
+		}
 	}
 }
 
@@ -113,13 +119,16 @@ void ACpp_Hoverboard::NegateRotation()
 
 void ACpp_Hoverboard::BoostSpeed()
 {
-	if (MovingForward && InAir == false)
+	if (!InAction)
 	{
+		if (MovingForward && InAir == false)
+		{
 
-		Speed = UKismetMathLibrary::Lerp(2000, 10000, 1);
-		Booster->Activate();
-		UGameplayStatics::PlaySoundAtLocation(this->GetWorld(), BoosterSound, this->GetActorLocation());
-		
+			Speed = UKismetMathLibrary::Lerp(2000, 10000, 1);
+			Booster->Activate();
+			UGameplayStatics::PlaySoundAtLocation(this->GetWorld(), BoosterSound, this->GetActorLocation());
+
+		}
 	}
 }
 
@@ -184,13 +193,21 @@ void ACpp_Hoverboard::TurnY(float AxisValue)
 
 void ACpp_Hoverboard::Jumping()
 {
+	if (!InAir)
+	{
+		Hoverboard->AddForceAtLocation((Hoverboard->GetUpVector() + Hoverboard->GetForwardVector()) * 3 * 1500000, Hoverboard->GetComponentLocation());
+	}
+}
 
-	UAnimInstance* JumpAnimInstance = Rider->GetAnimInstance();
-	if (JumpAnimInstance) JumpAnimInstance->Montage_Play(JumpAnimMontage, 1);
-
-	Hoverboard->AddForceAtLocation(Hoverboard->GetUpVector() * -1 * 1500000, Hoverboard->GetComponentLocation());
-
+void ACpp_Hoverboard::SplineSliding(USplineComponent* SplineComp)
+{
+	FTransform NearestTF;
 	
+	NearestTF = SplineComp->FindTransformClosestToWorldLocation(this->GetActorLocation(), ESplineCoordinateSpace::Local);
+    this->SetActorLocationAndRotation(NearestTF.GetLocation(), NearestTF.GetRotation());
+
+
+
 }
 
 void ACpp_Hoverboard::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -203,6 +220,12 @@ void ACpp_Hoverboard::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor
 		Rider->SetSimulatePhysics(true);
 		Rider->AddForceAtLocation(Hoverboard->GetForwardVector() * Speed * 500, this->GetActorLocation(), "None");
 		
+	}
+	else if (Cast<ACpp_SlideSpline>(OtherActor))
+	{
+		ACpp_SlideSpline* SlideSpline = Cast<ACpp_SlideSpline>(OtherActor);
+		InAction = true;
+		SplineSliding(SlideSpline->Spline);
 	}
 }
 

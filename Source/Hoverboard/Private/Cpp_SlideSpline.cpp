@@ -2,10 +2,10 @@
 
 
 #include "Cpp_SlideSpline.h"
+#include <Components/SplineMeshComponent.h>
 
-void ACpp_SlideSpline::AddSplineMeshes()
-{
-}
+
+
 
 
 
@@ -22,6 +22,10 @@ ACpp_SlideSpline::ACpp_SlideSpline()
 	
 
 }
+
+
+
+
 
 // Called when the game starts or when spawned
 void ACpp_SlideSpline::BeginPlay()

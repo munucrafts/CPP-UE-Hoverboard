@@ -8,19 +8,12 @@
 #include "Cpp_SlideSpline.generated.h"
 
 
+
 UCLASS()
 class HOVERBOARD_API ACpp_SlideSpline : public AActor
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere)
-	USceneComponent* Root;
-
-	UPROPERTY(EditAnywhere)
-	USplineComponent* Spline;
-
-	UFUNCTION()
-	void AddSplineMeshes();
 
 	
 
@@ -29,6 +22,18 @@ class HOVERBOARD_API ACpp_SlideSpline : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ACpp_SlideSpline();
+
+
+	UPROPERTY(EditAnywhere)
+	USceneComponent* Root;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USplineComponent* Spline;
+
+	
+
+
+
 
 protected:
 	// Called when the game starts or when spawned
