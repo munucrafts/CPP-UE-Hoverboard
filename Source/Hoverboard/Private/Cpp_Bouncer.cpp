@@ -37,7 +37,7 @@ void ACpp_Bouncer::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 
 void ACpp_Bouncer::AddBounceForce(UPrimitiveComponent* Comp)
 {
-	if (Comp->GetClass() == UStaticMeshComponent::StaticClass())
+	if (Comp->GetClass() == (UStaticMeshComponent::StaticClass()))
 	{
 		Comp->SetSimulatePhysics(true);
 		Comp->AddForceAtLocation(BounceForce * 100000 * this->GetActorUpVector(), Comp->GetComponentLocation());

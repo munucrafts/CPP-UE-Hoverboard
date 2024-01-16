@@ -201,13 +201,10 @@ void ACpp_Hoverboard::Jumping()
 
 void ACpp_Hoverboard::SplineSliding(USplineComponent* SplineComp)
 {
-	FTransform NearestTF;
-	
-	NearestTF = SplineComp->FindTransformClosestToWorldLocation(this->GetActorLocation(), ESplineCoordinateSpace::Local);
-    this->SetActorLocationAndRotation(NearestTF.GetLocation(), NearestTF.GetRotation());
-
-
-
+	FVector ActorLoc = this->GetActorLocation();
+	FVector SplineLoc = SplineComp->GetComponentLocation();
+	FVector SplineDistLoc = SplineComp->GetLocationAtDistanceAlongSpline(UKismetMathLibrary::Abs((ActorLoc - SplineLoc).Size()), ESplineCoordinateSpace::World);
+	this->SetActorLocation(SplineDistLoc);
 }
 
 void ACpp_Hoverboard::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
