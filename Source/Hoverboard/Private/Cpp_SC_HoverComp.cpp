@@ -42,7 +42,7 @@ void UCpp_SC_HoverComp::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	CollisionsParams.AddIgnoredActor(this->GetOwner());
 
 	bool HasHit = GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECollisionChannel::ECC_Visibility, CollisionsParams);
-	//DrawDebugDirectionalArrow(GetWorld(), Start, End, 5.0f, FColor::Red, false, 0.01f, 0, 1.f);
+	DrawDebugDirectionalArrow(GetWorld(), Start, End, 5.0f, FColor::Red, false, 0.01f, 0, 1.f);
 
 	float LerpAlpha = (OutHit.Location - this->GetComponentLocation()).Size() / TraceLength;
 	float LerpReturn = UKismetMathLibrary::Lerp(HoverForce, 0, LerpAlpha);

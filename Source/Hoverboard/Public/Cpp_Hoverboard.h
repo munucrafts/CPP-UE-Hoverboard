@@ -39,7 +39,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	USkeletalMeshComponent* Rider;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USpringArmComponent* SpringArm;
 
 	UPROPERTY(EditAnywhere)
@@ -62,9 +62,6 @@ public:
 
 	UFUNCTION()
 	void RotateHover(float AxisValue);
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Speed;
 
 	UFUNCTION()
 	void NegateRotation();
@@ -102,6 +99,9 @@ public:
 	float RotateMovementValue;
 	bool InAir;
 	bool InAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Speed;
 
 	UPROPERTY(EditAnywhere)
 	UAnimMontage* JumpAnimMontage;

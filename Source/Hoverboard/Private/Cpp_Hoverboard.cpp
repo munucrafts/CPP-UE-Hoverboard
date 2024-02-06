@@ -187,8 +187,6 @@ void ACpp_Hoverboard::TurnY(float AxisValue)
 	{
 		PlayerController->AddPitchInput(AxisValue * -0.75);
 	}
-
-
 }
 
 void ACpp_Hoverboard::Jumping()
